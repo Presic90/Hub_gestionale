@@ -363,7 +363,7 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
             else:
                 colonne_urgenze = ["Stato Attuale", "Strumento / Modello", "Scadenza", "Tipo di Controllo"]
                 colonne_urgenze_presenti = [c for c in colonne_urgenze if c in df_allarmi.columns]
-                st.dataframe(df_allarmi[colonne_urgenze_presenti], use_container_width=True, hide_index=True)
+                st.dataframe(df_allarmi[colonne_urgenze_presenti], use_container_width=False, hide_index=True)
 
         with tab3:
             st.markdown("Modifica i dati direttamente nelle celle e clicca su **Salva Modifiche**.")
@@ -488,7 +488,14 @@ elif modulo_scelto == "🚗 Flotta Automezzi":
         ordine_flotta = ["Allerta Scadenze", "Targa", "Veicolo", "Assegnatario", "Stato Mezzo", "Scadenza Assicurazione", "Scadenza Revisione", "Scadenza Bollo", "Note"]
         colonne_visibili_flotta = [col for col in ordine_flotta if col in df_view_flotta.columns]
 
-        df_flotta_editato = st.data_editor(df_view_flotta[colonne_visibili_flotta], height=600, use_container_width=False, hide_index=True, num_rows="dynamic", column_config=config_colonne_flotta)
+        df_flotta_editato = st.data_editor(
+            df_view_flotta[colonne_visibili_flotta], 
+            height=600, 
+            use_container_width=False, 
+            hide_index=True, 
+            num_rows="dynamic", 
+            column_config=config_colonne_flotta
+        )
         
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("💾 Salva Flotta sul Database", type="primary"):
@@ -585,9 +592,20 @@ elif modulo_scelto == "🦺 Personale e Sicurezza":
         with tab_anagrafica:
             st.subheader("Elenco Dipendenti")
             
+            if "ruoli_custom" not in st.session_state:
+                st.session_state.ruoli_custom = []
+
             ruoli_base = ["Dipendente", "Titolare", "CEO", "Amministrativo", "Tecnico", "Responsabile"]
             ruoli_storici = df_personale['Ruolo'].replace(["nan", "None", ""], pd.NA).dropna().unique().tolist()
-            lista_ruoli = sorted(list(set(ruoli_base + ruoli_storici)))
+            lista_ruoli = sorted(list(set(ruoli_base + ruoli_storici + st.session_state.ruoli_custom)))
+
+            with st.expander("➕ Crea un nuovo Ruolo per la tendina"):
+                col_r1, col_r2 = st.columns([3, 1])
+                nuovo_ruolo = col_r1.text_input("Digita il nuovo ruolo (es. Consulente, Stagista):", label_visibility="collapsed")
+                if col_r2.button("Aggiungi al menù", type="secondary", use_container_width=True):
+                    if nuovo_ruolo and nuovo_ruolo.strip() not in lista_ruoli:
+                        st.session_state.ruoli_custom.append(nuovo_ruolo.strip())
+                        st.rerun()
 
             config_colonne_personale = {
                 "Stato Sicurezza": st.column_config.TextColumn("Stato", disabled=True, width="small"),
