@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import altair as alt
 import os
+import json
 import gspread
 from gspread.exceptions import WorksheetNotFound
 
@@ -70,13 +71,21 @@ RUBRICA_FORNITORI = {
     "Sensys": {"tel": "+49 33631 59650", "email": "info@sensys.de"}
 }
 
-# --- CONNESSIONE GOOGLE SHEETS ---
+# --- CONNESSIONE GOOGLE SHEETS (CLOUD + LOCALE) ---
 @st.cache_resource
 def connetti_gsheets():
-    return gspread.oauth(
-        credentials_filename="client_secrets.json",
-        authorized_user_filename="token.json"
-    )
+    if "google_oauth" in st.secrets:
+        creds = json.loads(st.secrets["google_oauth"]["credentials"])
+        token = json.loads(st.secrets["google_oauth"]["token"])
+        gc_cloud, _ = gspread.oauth_from_dict(creds, token)
+        return gc_cloud
+    elif "gcp_service_account" in st.secrets:
+        return gspread.service_account_from_dict(st.secrets["gcp_service_account"])
+    else:
+        return gspread.oauth(
+            credentials_filename="client_secrets.json",
+            authorized_user_filename="token.json"
+        )
 
 gc = connetti_gsheets()
 
@@ -193,7 +202,6 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
     df = carica_dati_strumenti()
 
     if not df.empty:
-        # Eliminazione totale delle colonne superflue dal database
         if 'Contatti Utili' in df.columns: 
             df = df.drop(columns=['Contatti Utili'])
         if 'Requisiti ISO / Laboratorio' in df.columns:
@@ -234,7 +242,6 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
             else: scadenze.append(pd.NaT)
         df['Scadenza'] = scadenze
         
-        # Semafori compatti (solo icona)
         oggi = datetime.now().date()
         stati_dinamici = []
         for scadenza in df['Scadenza']:
@@ -338,7 +345,6 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
         with tab3:
             st.markdown("Modifica i dati direttamente nelle celle e clicca su **Salva Modifiche**.")
             
-            # CONFIGURAZIONE COMPATTA: larghezze calibrate al millimetro per eliminare gli spazi vuoti
             configurazione_colonne = {
                 "Stato Attuale": st.column_config.TextColumn("Stato", width="small", disabled=True), 
                 "Strumento / Modello": st.column_config.TextColumn("Strumento / Modello", width="medium"),
@@ -365,7 +371,6 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
                 if col not in colonne_visibili and col != "Stato": 
                     colonne_visibili.append(col)
             
-            # use_container_width=True con larghezze definite compatta la visuale e rimuove le distanze inutili
             df_editato = st.data_editor(
                 df_view[colonne_visibili], 
                 height=600, 
