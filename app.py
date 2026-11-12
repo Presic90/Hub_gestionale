@@ -69,7 +69,7 @@ if not st.session_state.autenticato:
                 st.rerun()
             else:
                 st.error("❌ Password errata. Riprova.")
-    st.stop()  # Ferma l'esecuzione del codice qui se non si è inserita la password corretta
+    st.stop()
 
 # --- DA QUI IN POI IL CODICE VIENE ESEGUITO SOLO SE AUTENTICATI ---
 
@@ -397,7 +397,7 @@ if modulo_scelto == "📊 Registro Strumenti ISO":
             df_editato = st.data_editor(
                 df_view[colonne_visibili], 
                 height=600, 
-                use_container_width=True, 
+                use_container_width=False, 
                 hide_index=True, 
                 num_rows="dynamic", 
                 column_config=configurazione_colonne
@@ -488,7 +488,7 @@ elif modulo_scelto == "🚗 Flotta Automezzi":
         ordine_flotta = ["Allerta Scadenze", "Targa", "Veicolo", "Assegnatario", "Stato Mezzo", "Scadenza Assicurazione", "Scadenza Revisione", "Scadenza Bollo", "Note"]
         colonne_visibili_flotta = [col for col in ordine_flotta if col in df_view_flotta.columns]
 
-        df_flotta_editato = st.data_editor(df_view_flotta[colonne_visibili_flotta], height=600, use_container_width=True, hide_index=True, num_rows="dynamic", column_config=config_colonne_flotta)
+        df_flotta_editato = st.data_editor(df_view_flotta[colonne_visibili_flotta], height=600, use_container_width=False, hide_index=True, num_rows="dynamic", column_config=config_colonne_flotta)
         
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("💾 Salva Flotta sul Database", type="primary"):
@@ -584,11 +584,16 @@ elif modulo_scelto == "🦺 Personale e Sicurezza":
 
         with tab_anagrafica:
             st.subheader("Elenco Dipendenti")
+            
+            ruoli_base = ["Dipendente", "Titolare", "CEO", "Amministrativo", "Tecnico", "Responsabile"]
+            ruoli_storici = df_personale['Ruolo'].replace(["nan", "None", ""], pd.NA).dropna().unique().tolist()
+            lista_ruoli = sorted(list(set(ruoli_base + ruoli_storici)))
+
             config_colonne_personale = {
                 "Stato Sicurezza": st.column_config.TextColumn("Stato", disabled=True, width="small"),
                 "Cognome": st.column_config.TextColumn("Cognome", required=True, width="medium"),
                 "Nome": st.column_config.TextColumn("Nome", required=True, width="medium"),
-                "Ruolo": st.column_config.TextColumn("Ruolo", width="medium"),
+                "Ruolo": st.column_config.SelectboxColumn("Ruolo", options=lista_ruoli, width="medium"),
                 "Scadenza Visita Medica": st.column_config.DateColumn("Scad. Visita Medica", format="DD/MM/YYYY", width="small"),
                 "Note": st.column_config.TextColumn("Note", width="large")
             }
@@ -599,7 +604,7 @@ elif modulo_scelto == "🦺 Personale e Sicurezza":
             df_personale_editato = st.data_editor(
                 df_view_personale[colonne_visibili_personale], 
                 height=600,
-                use_container_width=True, 
+                use_container_width=False, 
                 hide_index=True, 
                 num_rows="dynamic",
                 column_config=config_colonne_personale
@@ -706,7 +711,7 @@ elif modulo_scelto == "🦺 Personale e Sicurezza":
                 df_att_editato = st.data_editor(
                     df_att_filtrato[colonne_attestati],
                     height=600,
-                    use_container_width=True,
+                    use_container_width=False,
                     hide_index=True,
                     num_rows="dynamic",
                     column_config=config_attestati
