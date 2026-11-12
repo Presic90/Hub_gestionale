@@ -50,6 +50,29 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# --- SISTEMA DI ACCESSO CON PASSWORD ---
+PASSWORD_AZIENDALE = "GGM2026"
+
+if "autenticato" not in st.session_state:
+    st.session_state.autenticato = False
+
+if not st.session_state.autenticato:
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        st.title("🔒 Accesso Riservato HUB")
+        st.markdown("Inserisci la password aziendale per accedere al gestionale.")
+        pwd = st.text_input("Password:", type="password")
+        if st.button("Sblocca Gestionale", type="primary"):
+            if pwd == PASSWORD_AZIENDALE:
+                st.session_state.autenticato = True
+                st.rerun()
+            else:
+                st.error("❌ Password errata. Riprova.")
+    st.stop()  # Ferma l'esecuzione del codice qui se non si è inserita la password corretta
+
+# --- DA QUI IN POI IL CODICE VIENE ESEGUITO SOLO SE AUTENTICATI ---
+
 NOME_DATABASE = "Database_GGM"
 
 # --- RUBRICA FORNITORI E LABORATORI ---
@@ -75,17 +98,17 @@ RUBRICA_FORNITORI = {
 @st.cache_resource
 def connetti_gsheets():
     if "google_oauth" in st.secrets:
-        creds = json.loads(st.secrets["google_oauth"]["credentials"])
-        token = json.loads(st.secrets["google_oauth"]["token"])
-        gc_cloud, _ = gspread.oauth_from_dict(creds, token)
-        return gc_cloud
+        with open("client_secrets.json", "w") as f:
+            f.write(st.secrets["google_oauth"]["credentials"])
+        with open("token.json", "w") as f:
+            f.write(st.secrets["google_oauth"]["token"])
     elif "gcp_service_account" in st.secrets:
         return gspread.service_account_from_dict(st.secrets["gcp_service_account"])
-    else:
-        return gspread.oauth(
-            credentials_filename="client_secrets.json",
-            authorized_user_filename="token.json"
-        )
+        
+    return gspread.oauth(
+        credentials_filename="client_secrets.json",
+        authorized_user_filename="token.json"
+    )
 
 gc = connetti_gsheets()
 
