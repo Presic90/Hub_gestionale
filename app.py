@@ -19,12 +19,11 @@ if "autenticato" not in st.session_state:
     st.session_state.autenticato = False
 
 # ==============================================================================
-# --- SCHERMATA DI ACCESSO DARK GEOPHYSICS (SOLO SE NON AUTENTICATO) ---
+# --- SCHERMATA DI ACCESSO DARK TELEMETRY (SOLO SE NON AUTENTICATO) ---
 # ==============================================================================
 if not st.session_state.autenticato:
-    # Carica eventuale logo locale in base64 per mostrarlo nel cerchio
     logo_html = """
-    <svg width="54" height="54" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M32 10L22 34H42L32 10Z" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round"/>
         <line x1="14" y1="38" x2="50" y2="38" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"/>
         <line x1="19" y1="44" x2="45" y2="44" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
@@ -37,7 +36,7 @@ if not st.session_state.autenticato:
             with open(nome_logo, "rb") as img_f:
                 b64_img = base64.b64encode(img_f.read()).decode()
                 mime = "image/png" if nome_logo.endswith(".png") else "image/jpeg"
-                logo_html = f'<img src="data:{mime};base64,{b64_img}" style="width:68px; height:68px; object-fit:contain; border-radius:50%; background:white; padding:6px;" />'
+                logo_html = f'<img src="data:{mime};base64,{b64_img}" style="width:74px; height:74px; object-fit:contain; border-radius:50%;" />'
             break
 
     st.markdown("""
@@ -49,37 +48,59 @@ if not st.session_state.autenticato:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        /* Sfondo blu scuro con griglia tecnica */
+        /* Sfondo blu profondo con griglia ingegneristica */
         .stApp {
-            background-color: #061c33 !important;
+            background-color: #05192d !important;
             background-image: 
-                radial-gradient(circle at 50% 25%, rgba(14, 116, 144, 0.28) 0%, rgba(6, 28, 51, 0.96) 75%),
-                linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px) !important;
-            background-size: 100% 100%, 36px 36px, 36px 36px !important;
+                radial-gradient(circle at 50% 22%, rgba(14, 165, 233, 0.22) 0%, rgba(5, 25, 45, 0.98) 72%),
+                linear-gradient(rgba(56, 189, 248, 0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.055) 1px, transparent 1px) !important;
+            background-size: 100% 100%, 32px 32px, 32px 32px !important;
+        }
+
+        /* Titolo GGM S.R.L. forzato bianco nitido */
+        .hub-main-title {
+            color: #ffffff !important;
+            font-size: 2.4rem !important;
+            font-weight: 800 !important;
+            letter-spacing: 3px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-shadow: 0 2px 15px rgba(56, 189, 248, 0.25);
         }
 
         /* Card form login */
         [data-testid="stForm"] {
-            background: rgba(8, 35, 62, 0.78) !important;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(56, 189, 248, 0.25) !important;
+            background: rgba(8, 34, 60, 0.72) !important;
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(56, 189, 248, 0.22) !important;
             border-radius: 16px !important;
-            padding: 26px 28px !important;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+            padding: 24px 26px !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5) !important;
         }
 
-        /* Input password */
-        [data-testid="stForm"] input {
-            background-color: rgba(4, 20, 38, 0.85) !important;
-            color: #f8fafc !important;
-            border: 1px solid rgba(148, 163, 184, 0.35) !important;
+        /* Input password scuro ad alto contrasto */
+        [data-testid="stForm"] [data-baseweb="input"],
+        [data-testid="stForm"] [data-baseweb="base-input"] {
+            background-color: #041527 !important;
+            border: 1px solid rgba(125, 211, 252, 0.35) !important;
             border-radius: 10px !important;
-            padding: 12px 14px !important;
         }
-        [data-testid="stForm"] input:focus {
-            border-color: #0ea5e9 !important;
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.25) !important;
+        [data-testid="stForm"] input {
+            background-color: transparent !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            font-size: 0.95rem !important;
+            padding: 11px 14px !important;
+        }
+        [data-testid="stForm"] input::placeholder {
+            color: #64748b !important;
+            -webkit-text-fill-color: #64748b !important;
+        }
+        [data-testid="stForm"] button[aria-label="Show password text"],
+        [data-testid="stForm"] button[aria-label="Hide password text"] {
+            color: #94a3b8 !important;
+            background: transparent !important;
         }
 
         /* Bottone Accedi */
@@ -87,7 +108,8 @@ if not st.session_state.autenticato:
             background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%) !important;
             color: #ffffff !important;
             font-weight: 700 !important;
-            letter-spacing: 0.6px !important;
+            font-size: 0.9rem !important;
+            letter-spacing: 0.8px !important;
             border: none !important;
             border-radius: 10px !important;
             padding: 12px 24px !important;
@@ -96,55 +118,88 @@ if not st.session_state.autenticato:
         }
         [data-testid="stFormSubmitButton"] button:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.55) !important;
+            box-shadow: 0 10px 26px rgba(14, 165, 233, 0.55) !important;
         }
 
-        @keyframes pulseWave {
-            0%, 100% { opacity: 0.85; transform: translateX(0px); }
-            50% { opacity: 1; transform: translateX(6px); }
+        /* Animazioni telemetria HUB */
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(0.85); }
         }
-        .wave-anim {
-            animation: pulseWave 3.5s ease-in-out infinite;
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
+        .status-dot-1 { animation: pulseDot 2.2s infinite ease-in-out; }
+        .status-dot-2 { animation: pulseDot 2.2s infinite ease-in-out 0.7s; }
+        .status-dot-3 { animation: pulseDot 2.2s infinite ease-in-out 1.4s; }
+        .scan-bar {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-bar::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+            animation: scanLine 2.8s infinite linear;
         }
         </style>
     """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 3vh;'></div>", unsafe_allow_html=True)
-    _, col_center, _ = st.columns([1.15, 1.3, 1.15])
+    _, col_center, _ = st.columns([1.2, 1.25, 1.2])
 
     with col_center:
-        # Intestazione + Logo + Box Tracce Sismiche
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 18px;">
-            <div style="width: 86px; height: 86px; border-radius: 50%; border: 2.5px solid #ffffff; margin: 0 auto 18px auto; display: flex; align-items: center; justify-content: center; background: rgba(14, 165, 233, 0.12); box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);">
+            <div style="width: 88px; height: 88px; border-radius: 50%; border: 2.5px solid #ffffff; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; background: rgba(14, 165, 233, 0.1); box-shadow: 0 0 28px rgba(56, 189, 248, 0.25);">
                 {logo_html}
             </div>
-            <h1 style="color: #ffffff !important; font-size: 2.35rem !important; font-weight: 800 !important; letter-spacing: 2px; margin: 0 !important; padding: 0 !important;">GGM S.R.L.</h1>
-            <p style="color: #7dd3fc; font-size: 0.78rem; font-weight: 700; letter-spacing: 2.2px; text-transform: uppercase; margin-top: 8px; line-height: 1.5;">
+            <div class="hub-main-title">GGM S.R.L.</div>
+            <p style="color: #7dd3fc; font-size: 0.76rem; font-weight: 700; letter-spacing: 2.2px; text-transform: uppercase; margin-top: 8px; line-height: 1.55;">
                 HUB TARATURE ISO • FLOTTA<br>&amp; SICUREZZA
             </p>
         </div>
 
-        <div style="background: rgba(4, 21, 38, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px; box-shadow: inset 0 0 20px rgba(0,0,0,0.4);">
-            <svg class="wave-anim" width="100%" height="68" viewBox="0 0 360 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="0" y1="16" x2="360" y2="16" stroke="rgba(148,163,184,0.18)" stroke-dasharray="3 3"/>
-                <line x1="0" y1="36" x2="360" y2="36" stroke="rgba(148,163,184,0.18)" stroke-dasharray="3 3"/>
-                <line x1="0" y1="56" x2="360" y2="56" stroke="rgba(148,163,184,0.18)" stroke-dasharray="3 3"/>
-                <!-- Traccia 1 Ciano -->
-                <path d="M0 16 L115 16 L122 6 L129 24 L136 11 L143 19 L150 16 L360 16" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- Traccia 2 Azzurro -->
-                <path d="M0 36 L205 36 L212 25 L219 45 L226 30 L233 40 L240 36 L360 36" stroke="#22d3ee" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- Traccia 3 Verde -->
-                <path d="M0 56 L265 56 L271 65 L278 46 L284 59 L290 56 L360 56" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- Pannello Telemetria Moduli HUB -->
+        <div style="background: rgba(4, 21, 38, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; box-shadow: inset 0 0 22px rgba(0,0,0,0.45);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot-1" style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px #38bdf8; display: inline-block;"></span>
+                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">STRUMENTI ISO</span>
+                </div>
+                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(56, 189, 248, 0.18); border-radius: 4px;">
+                    <div style="width: 85%; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8); border-radius: 4px;"></div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot-2" style="width: 8px; height: 8px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 8px #22d3ee; display: inline-block;"></span>
+                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">FLOTTA MEZZI</span>
+                </div>
+                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(34, 211, 238, 0.18); border-radius: 4px;">
+                    <div style="width: 92%; height: 100%; background: linear-gradient(90deg, #0891b2, #22d3ee); border-radius: 4px;"></div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot-3" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; display: inline-block;"></span>
+                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">SICUREZZA &amp; DPI</span>
+                </div>
+                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(16, 185, 129, 0.18); border-radius: 4px;">
+                    <div style="width: 78%; height: 100%; background: linear-gradient(90deg, #059669, #10b981); border-radius: 4px;"></div>
+                </div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Form Login (supporta invio rapido con tasto Enter)
+        # Form Login
         with st.form("login_hub_form", clear_on_submit=False):
-            st.markdown('<p style="color:#f1f5f9; font-weight:700; font-size:0.92rem; margin-bottom:8px;">🔐 Password di Accesso all\'HUB</p>', unsafe_allow_html=True)
-            pwd = st.text_input("Password", type="password", placeholder="Inserisci la password dello studio...", label_visibility="collapsed")
-            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            st.markdown('<p style="color:#f1f5f9; font-weight:700; font-size:0.9rem; margin-bottom:10px;">🔐 Password di Accesso all\'HUB</p>', unsafe_allow_html=True)
+            pwd = st.text_input("Password", type="password", placeholder="Inserisci la password dello studio", label_visibility="collapsed")
+            st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
             submitted = st.form_submit_button("🔓 ACCEDI ALL'HUB", use_container_width=True)
             if submitted:
                 if pwd == PASSWORD_AZIENDALE:
