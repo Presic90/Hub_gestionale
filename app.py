@@ -48,7 +48,6 @@ if not st.session_state.autenticato:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        /* Sfondo blu profondo con griglia ingegneristica */
         .stApp {
             background-color: #05192d !important;
             background-image: 
@@ -58,7 +57,6 @@ if not st.session_state.autenticato:
             background-size: 100% 100%, 32px 32px, 32px 32px !important;
         }
 
-        /* Titolo GGM S.R.L. bianco nitido */
         .hub-main-title {
             color: #ffffff !important;
             font-size: 2.4rem !important;
@@ -69,7 +67,6 @@ if not st.session_state.autenticato:
             text-shadow: 0 2px 15px rgba(56, 189, 248, 0.25);
         }
 
-        /* Card form login */
         [data-testid="stForm"] {
             background: rgba(8, 34, 60, 0.72) !important;
             backdrop-filter: blur(14px);
@@ -79,7 +76,6 @@ if not st.session_state.autenticato:
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5) !important;
         }
 
-        /* Input password IDENTICO allo stile dark del Magazzino */
         [data-testid="stForm"] div[data-testid="stTextInput"] > div,
         [data-testid="stForm"] div[data-baseweb="input"],
         [data-testid="stForm"] div[data-baseweb="base-input"],
@@ -106,7 +102,6 @@ if not st.session_state.autenticato:
             -webkit-text-fill-color: #94a3b8 !important;
             opacity: 1 !important;
         }
-        /* Nasconde "Press Enter to submit form" e colora l'occhio */
         [data-testid="stForm"] div[data-testid="InputInstructions"] {
             display: none !important;
         }
@@ -121,7 +116,6 @@ if not st.session_state.autenticato:
             fill: #94a3b8 !important;
         }
 
-        /* Bottone Accedi */
         [data-testid="stFormSubmitButton"] button {
             background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%) !important;
             color: #ffffff !important;
@@ -139,7 +133,6 @@ if not st.session_state.autenticato:
             box-shadow: 0 10px 26px rgba(14, 165, 233, 0.55) !important;
         }
 
-        /* Animazioni telemetria HUB ad alta fluidità */
         @keyframes pulseDot {
             0%, 100% { opacity: 1; transform: scale(1.1); }
             50% { opacity: 0.35; transform: scale(0.8); }
@@ -224,7 +217,6 @@ if not st.session_state.autenticato:
             </p>
         </div>
 
-        <!-- Pannello Telemetria Moduli HUB Animato -->
         <div style="background: rgba(4, 21, 38, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 15px 18px; margin-bottom: 20px; box-shadow: inset 0 0 22px rgba(0,0,0,0.45);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -250,7 +242,6 @@ if not st.session_state.autenticato:
         </div>
         """, unsafe_allow_html=True)
 
-        # Form Login
         with st.form("login_hub_form", clear_on_submit=False):
             st.markdown('<p style="color:#f1f5f9; font-weight:700; font-size:0.9rem; margin-bottom:10px;">🔐 Password di Accesso all\'HUB</p>', unsafe_allow_html=True)
             pwd = st.text_input("Password", type="password", placeholder="Inserisci la password dello studio", label_visibility="collapsed")
@@ -481,25 +472,20 @@ def salva_su_excel(df_da_salvare, nome_foglio):
         st.error(f"Errore di salvataggio su Google Sheets: {e}")
         return False
 
-# --- FUNZIONE SUPPORTO UNIONE DATI ---
-def unisci_e_salva_dati(df_originale, df_modificato):
-    df_completo = df_originale.copy()
-    
-    for col in df_modificato.columns:
-        if col not in df_completo.columns:
-            df_completo[col] = ""
+# --- FUNZIONE SUPPORTO UNIONE DATI (SUPPORTA ANCHE ELIMINAZIONE RIGHE) ---
+def unisci_e_salva_dati(df_originale, df_vista_iniziale, df_modificato):
+    # Mantiene solo le righe nascoste da eventuali filtri attivi
+    indici_nascosti = df_originale.index.difference(df_vista_iniziale.index)
+    df_nascosti = df_originale.loc[indici_nascosti].copy()
 
-    esistenti = df_modificato[df_modificato.index.isin(df_completo.index)]
-    nuove_righe = df_modificato[~df_modificato.index.isin(df_completo.index)]
-    
-    for col in esistenti.columns:
-        df_completo[col] = df_completo[col].astype(object)
-        df_completo.loc[esistenti.index, col] = esistenti[col]
-        
-    if not nuove_righe.empty:
-        df_completo = pd.concat([df_completo, nuove_righe], ignore_index=True)
-        
-    return df_completo
+    df_edit = df_modificato.copy()
+    for col in df_originale.columns:
+        if col not in df_edit.columns:
+            df_edit[col] = ""
+
+    # Se non ci sono filtri attivi, df_nascosti è vuoto e le righe eliminate vengono rimosse
+    df_risultato = pd.concat([df_nascosti, df_edit], ignore_index=True)
+    return df_risultato
 
 # ==========================================
 # --- MENU DI NAVIGAZIONE LATERALE (HUB) ---
@@ -693,7 +679,7 @@ if modulo_scelto == "Registro Strumenti":
 
         with tab3:
             with st.container(border=True):
-                st.markdown("Modifica i dati direttamente nelle celle e clicca su **Salva Modifiche Strumenti**.")
+                st.markdown("Modifica i dati nelle celle (oppure spunta a sinistra e premi **Canc** per eliminare) e clicca su **Salva Modifiche Strumenti**.")
                 
                 configurazione_colonne = {
                     "Stato Attuale": st.column_config.TextColumn("Stato", width="small", disabled=True), 
@@ -725,14 +711,14 @@ if modulo_scelto == "Registro Strumenti":
                     df_view[colonne_visibili], 
                     height=580, 
                     use_container_width=False, 
-                    hide_index=True, 
+                    hide_index=False, 
                     num_rows="dynamic", 
                     column_config=configurazione_colonne
                 )
 
                 st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
                 if st.button("💾 Salva Modifiche Strumenti", type="primary"):
-                    df_completo = unisci_e_salva_dati(df, df_editato)
+                    df_completo = unisci_e_salva_dati(df, df_view, df_editato)
                     df_da_salvare = df_completo.drop(columns=['Stato Attuale', 'Scadenza'], errors='ignore')
                     if salva_su_excel(df_da_salvare, "Registro_Strumenti_ISO"):
                         st.success("✅ Modifiche Strumenti salvate con successo su Google Sheets!")
@@ -808,6 +794,7 @@ elif modulo_scelto == "Flotta Automezzi":
 
         st.markdown("<div style='height:15px;'></div>", unsafe_allow_html=True)
         with st.container(border=True):
+            st.markdown("Modifica i veicoli (oppure spunta la casella a sinistra e premi **Canc** per eliminarli) e clicca su **Salva Flotta sul Database**.")
             config_colonne_flotta = {
                 "Allerta Scadenze": st.column_config.TextColumn("Stato", disabled=True, width="small"),
                 "Targa": st.column_config.TextColumn("Targa", required=True, width="small"),
@@ -827,14 +814,14 @@ elif modulo_scelto == "Flotta Automezzi":
                 df_view_flotta[colonne_visibili_flotta], 
                 height=580, 
                 use_container_width=False, 
-                hide_index=True, 
+                hide_index=False, 
                 num_rows="dynamic", 
                 column_config=config_colonne_flotta
             )
             
             st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
             if st.button("💾 Salva Flotta sul Database", type="primary"):
-                df_completo_flotta = unisci_e_salva_dati(df_flotta, df_flotta_editato)
+                df_completo_flotta = unisci_e_salva_dati(df_flotta, df_view_flotta, df_flotta_editato)
                 df_da_salvare_f = df_completo_flotta.drop(columns=['Allerta Scadenze']) if 'Allerta Scadenze' in df_completo_flotta.columns else df_completo_flotta
                 
                 if salva_su_excel(df_da_salvare_f, "Flotta Automezzi"):
@@ -959,14 +946,14 @@ elif modulo_scelto == "Personale e Sicurezza":
                     df_view_personale[colonne_visibili_personale], 
                     height=550,
                     use_container_width=False, 
-                    hide_index=True, 
+                    hide_index=False, 
                     num_rows="dynamic",
                     column_config=config_colonne_personale
                 )
                 
                 st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
                 if st.button("💾 Salva Anagrafica", type="primary"):
-                    df_completo_personale = unisci_e_salva_dati(df_personale, df_personale_editato)
+                    df_completo_personale = unisci_e_salva_dati(df_personale, df_view_personale, df_personale_editato)
                     colonne_da_rimuovere = ['Stato Sicurezza', 'ID_Dipendente']
                     df_da_salvare_p = df_completo_personale.drop(columns=[col for col in colonne_da_rimuovere if col in df_completo_personale.columns])
                     
@@ -986,6 +973,7 @@ elif modulo_scelto == "Personale e Sicurezza":
                 else:
                     dipendente_selezionato = st.selectbox("Seleziona il dipendente di cui gestire il fascicolo:", lista_dipendenti)
                     st.subheader(f"Attestati di: {dipendente_selezionato}")
+                    st.caption("💡 Per eliminare una qualifica/corso errato, spunta la casella a sinistra della riga e premi **Canc** (oppure clicca sull'icona del cestino in alto a destra sulla tabella), poi clicca su **Salva Fascicolo**.")
                     
                     lista_corsi_base = [
                         "Sicurezza Lavoratori (Base)", "Sicurezza Lavoratori (Specifica)", "Addetto Antincendio", 
@@ -1067,7 +1055,7 @@ elif modulo_scelto == "Personale e Sicurezza":
                         df_att_filtrato[colonne_attestati],
                         height=550,
                         use_container_width=False,
-                        hide_index=True,
+                        hide_index=False,
                         num_rows="dynamic",
                         column_config=config_attestati
                     )
