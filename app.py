@@ -36,7 +36,7 @@ if not st.session_state.autenticato:
             with open(nome_logo, "rb") as img_f:
                 b64_img = base64.b64encode(img_f.read()).decode()
                 mime = "image/png" if nome_logo.endswith(".png") else "image/jpeg"
-                logo_html = f'<img src="data:{mime};base64,{b64_img}" style="width:74px; height:74px; object-fit:contain; border-radius:50%;" />'
+                logo_html = f'<img src="data:{mime};base64,{b64_img}" style="width:72px; height:72px; object-fit:contain; border-radius:50%; filter: invert(1) brightness(2); mix-blend-mode: screen;" />'
             break
 
     st.markdown("""
@@ -58,7 +58,7 @@ if not st.session_state.autenticato:
             background-size: 100% 100%, 32px 32px, 32px 32px !important;
         }
 
-        /* Titolo GGM S.R.L. forzato bianco nitido */
+        /* Titolo GGM S.R.L. bianco nitido */
         .hub-main-title {
             color: #ffffff !important;
             font-size: 2.4rem !important;
@@ -79,28 +79,46 @@ if not st.session_state.autenticato:
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5) !important;
         }
 
-        /* Input password scuro ad alto contrasto */
-        [data-testid="stForm"] [data-baseweb="input"],
-        [data-testid="stForm"] [data-baseweb="base-input"] {
+        /* Input password IDENTICO allo stile dark del Magazzino */
+        [data-testid="stForm"] div[data-testid="stTextInput"] > div,
+        [data-testid="stForm"] div[data-baseweb="input"],
+        [data-testid="stForm"] div[data-baseweb="base-input"],
+        [data-testid="stForm"] div[data-baseweb="base-input"] > div {
             background-color: #041527 !important;
-            border: 1px solid rgba(125, 211, 252, 0.35) !important;
+            border-color: rgba(148, 163, 184, 0.35) !important;
             border-radius: 10px !important;
+            box-shadow: none !important;
+        }
+        [data-testid="stForm"] div[data-baseweb="input"]:focus-within {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 1px #38bdf8 !important;
         }
         [data-testid="stForm"] input {
-            background-color: transparent !important;
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff !important;
+            background-color: #041527 !important;
+            color: #f8fafc !important;
+            -webkit-text-fill-color: #f8fafc !important;
+            caret-color: #38bdf8 !important;
             font-size: 0.95rem !important;
-            padding: 11px 14px !important;
+            padding: 12px 14px !important;
         }
         [data-testid="stForm"] input::placeholder {
-            color: #64748b !important;
-            -webkit-text-fill-color: #64748b !important;
+            color: #94a3b8 !important;
+            -webkit-text-fill-color: #94a3b8 !important;
+            opacity: 1 !important;
+        }
+        /* Nasconde "Press Enter to submit form" e colora l'occhio */
+        [data-testid="stForm"] div[data-testid="InputInstructions"] {
+            display: none !important;
         }
         [data-testid="stForm"] button[aria-label="Show password text"],
         [data-testid="stForm"] button[aria-label="Hide password text"] {
             color: #94a3b8 !important;
-            background: transparent !important;
+            background-color: #041527 !important;
+            border: none !important;
+        }
+        [data-testid="stForm"] button[aria-label="Show password text"] svg,
+        [data-testid="stForm"] button[aria-label="Hide password text"] svg {
+            fill: #94a3b8 !important;
         }
 
         /* Bottone Accedi */
@@ -121,30 +139,73 @@ if not st.session_state.autenticato:
             box-shadow: 0 10px 26px rgba(14, 165, 233, 0.55) !important;
         }
 
-        /* Animazioni telemetria HUB */
+        /* Animazioni telemetria HUB ad alta fluidità */
         @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.45; transform: scale(0.85); }
+            0%, 100% { opacity: 1; transform: scale(1.1); }
+            50% { opacity: 0.35; transform: scale(0.8); }
         }
-        @keyframes scanLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(250%); }
+        @keyframes fillPulse1 {
+            0%, 100% { width: 58%; }
+            50% { width: 94%; }
         }
-        .status-dot-1 { animation: pulseDot 2.2s infinite ease-in-out; }
-        .status-dot-2 { animation: pulseDot 2.2s infinite ease-in-out 0.7s; }
-        .status-dot-3 { animation: pulseDot 2.2s infinite ease-in-out 1.4s; }
-        .scan-bar {
+        @keyframes fillPulse2 {
+            0%, 100% { width: 88%; }
+            50% { width: 62%; }
+        }
+        @keyframes fillPulse3 {
+            0%, 100% { width: 68%; }
+            50% { width: 96%; }
+        }
+        @keyframes energySweep {
+            0% { left: -45%; }
+            100% { left: 125%; }
+        }
+
+        .status-dot-1 { animation: pulseDot 1.8s infinite ease-in-out; }
+        .status-dot-2 { animation: pulseDot 1.8s infinite ease-in-out 0.6s; }
+        .status-dot-3 { animation: pulseDot 1.8s infinite ease-in-out 1.2s; }
+
+        .bar-track {
+            width: 50%;
+            height: 6px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill-1, .bar-fill-2, .bar-fill-3 {
+            height: 100%;
+            border-radius: 99px;
             position: relative;
             overflow: hidden;
         }
-        .scan-bar::after {
+        .bar-fill-1 {
+            background: linear-gradient(90deg, #0284c7, #38bdf8);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            animation: fillPulse1 3.2s infinite ease-in-out;
+        }
+        .bar-fill-2 {
+            background: linear-gradient(90deg, #0891b2, #22d3ee);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
+            animation: fillPulse2 3.8s infinite ease-in-out;
+        }
+        .bar-fill-3 {
+            background: linear-gradient(90deg, #059669, #34d399);
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+            animation: fillPulse3 3.5s infinite ease-in-out;
+        }
+        .bar-fill-1::after, .bar-fill-2::after, .bar-fill-3::after {
             content: "";
             position: absolute;
-            top: 0; left: 0;
-            width: 40%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
-            animation: scanLine 2.8s infinite linear;
+            top: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+            animation: energySweep 1.6s infinite linear;
         }
+        .bar-fill-2::after { animation-delay: 0.5s; }
+        .bar-fill-3::after { animation-delay: 1s; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -154,7 +215,7 @@ if not st.session_state.autenticato:
     with col_center:
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 18px;">
-            <div style="width: 88px; height: 88px; border-radius: 50%; border: 2.5px solid #ffffff; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; background: rgba(14, 165, 233, 0.1); box-shadow: 0 0 28px rgba(56, 189, 248, 0.25);">
+            <div style="width: 88px; height: 88px; border-radius: 50%; border: 2.5px solid #ffffff; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; background: rgba(14, 165, 233, 0.12); box-shadow: 0 0 28px rgba(56, 189, 248, 0.25);">
                 {logo_html}
             </div>
             <div class="hub-main-title">GGM S.R.L.</div>
@@ -163,34 +224,28 @@ if not st.session_state.autenticato:
             </p>
         </div>
 
-        <!-- Pannello Telemetria Moduli HUB -->
-        <div style="background: rgba(4, 21, 38, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; box-shadow: inset 0 0 22px rgba(0,0,0,0.45);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <!-- Pannello Telemetria Moduli HUB Animato -->
+        <div style="background: rgba(4, 21, 38, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 15px 18px; margin-bottom: 20px; box-shadow: inset 0 0 22px rgba(0,0,0,0.45);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot-1" style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px #38bdf8; display: inline-block;"></span>
-                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">STRUMENTI ISO</span>
+                    <span style="color: #e2e8f0; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">STRUMENTI ISO</span>
                 </div>
-                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(56, 189, 248, 0.18); border-radius: 4px;">
-                    <div style="width: 85%; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8); border-radius: 4px;"></div>
-                </div>
+                <div class="bar-track"><div class="bar-fill-1"></div></div>
             </div>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot-2" style="width: 8px; height: 8px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 8px #22d3ee; display: inline-block;"></span>
-                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">FLOTTA MEZZI</span>
+                    <span style="color: #e2e8f0; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">FLOTTA MEZZI</span>
                 </div>
-                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(34, 211, 238, 0.18); border-radius: 4px;">
-                    <div style="width: 92%; height: 100%; background: linear-gradient(90deg, #0891b2, #22d3ee); border-radius: 4px;"></div>
-                </div>
+                <div class="bar-track"><div class="bar-fill-2"></div></div>
             </div>
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot-3" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; display: inline-block;"></span>
-                    <span style="color: #cbd5e1; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">SICUREZZA &amp; DPI</span>
+                    <span class="status-dot-3" style="width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; display: inline-block;"></span>
+                    <span style="color: #e2e8f0; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;">SICUREZZA &amp; DPI</span>
                 </div>
-                <div class="scan-bar" style="width: 48%; height: 5px; background: rgba(16, 185, 129, 0.18); border-radius: 4px;">
-                    <div style="width: 78%; height: 100%; background: linear-gradient(90deg, #059669, #10b981); border-radius: 4px;"></div>
-                </div>
+                <div class="bar-track"><div class="bar-fill-3"></div></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
